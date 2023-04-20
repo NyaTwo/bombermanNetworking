@@ -1,0 +1,1 @@
+Lilith Ostrowska. I have made a 2 player bomberman game where you place bombs to destroy boxes and try to kill the oponent. The only thing i used brefly was cppreference.com
