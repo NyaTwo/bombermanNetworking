@@ -37,14 +37,12 @@ private:
    void handle_disconnect(const ip_address &address, byte_stream_reader &reader);
    void handle_payload(const ip_address &address, byte_stream_reader &reader);
    void handle_gamestate(const ip_address& adress, byte_stream_reader& reader);
-   void check_collision(const ip_address& adress, byte_stream_reader& reader);
 
    bool send_connecting(const connection &conn);
    bool send_disconnect(const ip_address &address, uint32 reason);
    bool send_payload(connection &conn);
    bool send_gamestate(connection& conn);
    bool send_byte_stream(const ip_address &address, const byte_stream &stream);
-   bool send_collision_status(connection& conn);
 private:
    listener               &m_listener;
    network                 m_network;

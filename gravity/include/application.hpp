@@ -29,7 +29,6 @@ private:
    void connect();
    void updateEntities(float dt);
    void checkCollision();
-   void playerUpdate();
    void enemyUpdate();
    void render();
 

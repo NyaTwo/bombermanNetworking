@@ -1,9 +1,7 @@
 // client.cpp
 
 #include "client.hpp"
-//server discovery class
-//multiple sockets
-//broadcast connect packet
+
 client::client(listener &listener) 
    : m_listener(listener)
 {
