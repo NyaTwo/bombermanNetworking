@@ -3,7 +3,8 @@
 #include "client.hpp"
 
 client::client(listener &listener) 
-   : m_listener(listener)
+   : m_listener(listener),
+    m_clientTick(0)
 {
 }
 
@@ -12,6 +13,7 @@ bool client::create()
     if (!m_socket.open()) {
         return false;
     }
+    
    return true;
 }
 
@@ -44,7 +46,7 @@ void client::client::disconnect()
 
 void client::update()
 {
-   m_inputinator.predictInput(getPosOfDynamicEntities(1));
+   m_inputinator.predictInput(getPosOfDynamicEntities(1),m_clientTick);
    perform_timeout_check();
    receive();
 }
@@ -98,10 +100,11 @@ void client::receive()
 
 void client::transmit()
 {
+    
    if (m_connection.is_disconnected()) {
       return;
    }
-
+  
    const timespan current_time = timespan::time_since_start();
    if (m_connection.is_time_to_send()) {
       if (m_connection.is_connected()) {
@@ -197,6 +200,7 @@ void client::handle_connect(const ip_address &address, byte_stream_reader &reade
          m_listener.on_connect();
          m_connection.set_state(connection::state::connected);
          m_connection.set_send_interval(kDefaultConnectedSendInterval);
+         m_clientTick = packet.m_session;
       }
       else {
          m_listener.on_disconnect(false);
@@ -226,6 +230,7 @@ void client::handle_payload(const ip_address &address, byte_stream_reader &reade
          m_connection.set_acknowledge(packet.m_sequence);
          m_connection.set_last_recieved(timespan::time_since_start());
          m_listener.on_receive(packet.m_acknowledge, reader);
+         m_clientTick = packet.m_acknowledge;
       }
    }
 }
@@ -249,11 +254,10 @@ void client::handle_gamestate(const ip_address& address, byte_stream_reader& rea
                 }
                 else {
                     sf::Vector2f pos = sf::Vector2f(info.dynamicEntityPositions[i].x, info.dynamicEntityPositions[i].y);
-                    if (m_inputinator.validateInput(pos)) {
+                    if (m_inputinator.validateInput(pos, m_clientTick)) {
                         m_entityPositions[i] = pos;
                     }
                     else {
-                        m_inputinator.handleMisprediction(pos);
                         m_mispredictions++;
                         m_entityPositions[i] = pos;
                     }
@@ -266,6 +270,7 @@ void client::handle_gamestate(const ip_address& address, byte_stream_reader& rea
             }
             setPlayerPos(sf::Vector2f(m_entityPositions[m_clientID]));
             m_listener.on_receive(info.m_acknowledge, reader);
+            m_clientTick = info.m_acknowledge;
         }
     }
 }

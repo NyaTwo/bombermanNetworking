@@ -12,6 +12,7 @@
 #include "box.h"
 #include "wall.h"
 #include "enemy.h"
+#include <serverDiscovery.h>
 
 class application final : client::listener {
 public:
@@ -61,10 +62,15 @@ private:
    Interpolator			m_interpolator;
    gameMap				m_gameMap;
    Player				m_player;
+   serverDiscovery m_serverDisc;
+   ip_address       m_serverIP;
 private:
    bool             m_running{ true };
    bool				m_placedEnemyBomb = false;
    bool				m_gameEnded = false;
+   bool				m_serverFound = false;
+   float			m_timer = 0;
+   float			m_timeToServerSearch = 0.6;
    keyboard         m_keyboard;
    client           m_client;
    uint32           m_tick{ 0 };

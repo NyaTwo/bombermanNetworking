@@ -80,7 +80,8 @@ private:
    sf::Vector2f m_entityPositions[4];
    sf::Vector2f m_staticEntityPositions[2];
    uint8        m_clientID = 0;
-
+   uint32       m_clientTick;
+   
 private:
     float        m_lastGameState = 0;
     float        m_currGameState = 0;

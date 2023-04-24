@@ -7,6 +7,8 @@
 static ip_address 
 get_same_host_server_address()
 {
+   
+   
    std::vector<ip_address> addresses;
    if (!ip_address::get_local_addresses(addresses)) {
       return {};
@@ -25,6 +27,7 @@ get_same_host_server_address()
 application::application()
    : m_client(*this)
 {
+
 }
 
 bool application::enter()
@@ -36,6 +39,8 @@ bool application::enter()
    if (!m_client.create()) {
        return false;
    }
+
+   
 
    enemy enemy;
    enemy.baseShape.setPosition(gameArea.right, gameArea.bottom);
@@ -97,8 +102,13 @@ void application::exit()
 
 bool application::update()
 {
-   m_deltatime = m_clock.restart();
-   m_apptime += m_deltatime;
+    m_deltatime = m_clock.restart();
+    m_apptime += m_deltatime;
+    if (m_serverDisc.serverFind(m_deltatime.asSeconds()) && !m_serverFound) {
+        m_serverIP = m_serverDisc.getServerIP();
+        m_serverFound = true;
+    }
+   
    if (!m_gameEnded) {
        wrapPlayerAroundGameArea();
        if (m_client.is_connected()) {
@@ -172,7 +182,7 @@ void application::connect()
         m_state.setFillColor(sf::Color::Cyan);
         m_state.setString("Connecting...");
 
-        ip_address address = get_same_host_server_address();
+        ip_address address = m_serverIP;
         m_client.connect(address, 1);
 
         m_server.setString(address.as_string());
