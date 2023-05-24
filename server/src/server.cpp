@@ -143,6 +143,7 @@ connection *server::add_connecting(const ip_address &address, const uint32 sessi
    conn.set_state(connection::state::connecting);
    conn.set_session(session);
    conn.set_last_recieved(timespan::time_since_start());
+   m_listener.on_connect(m_connection_counter);
    m_connections.push_back(conn);
    return &m_connections.back();
 }
@@ -221,7 +222,6 @@ void server::handle_payload(const ip_address &address, byte_stream_reader &reade
 
    if (connection *conn = get_connection(address)) {
       if (conn->is_connecting()) {
-         m_listener.on_connect(conn->m_id);
          conn->set_state(connection::state::connected);
       }
 
@@ -246,7 +246,7 @@ void server::handle_gamestate(const ip_address& adress, byte_stream_reader& read
     }
     if (connection* conn = get_connection(adress)) { 
         if (conn->m_acknowledge < info.m_sequence) {
-            m_currentClientID = info.m_clientID;
+
             dynamicPositions[info.m_clientID].x = info.dynamicEntityPositions[info.m_clientID].x;
             dynamicPositions[info.m_clientID].y = info.dynamicEntityPositions[info.m_clientID].y;
             staticPositions[info.m_clientID].x = info.staticEntityPositions[info.m_clientID].x;
@@ -324,7 +324,7 @@ bool server::send_gamestate(connection& conn)
         staticPositions[i].x = 0;
         staticPositions[i].y = 0;
     }
-    gameplay_info_message info(m_currentClientID, 
+    gameplay_info_message info(conn.m_id, 
         conn.m_sequence, 
         conn.m_acknowledge, 
         dynTempArrayX, 

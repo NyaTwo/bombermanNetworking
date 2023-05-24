@@ -47,7 +47,6 @@ private:
    listener               &m_listener;
    network                 m_network;
    udp_socket              m_socket;
-   uint8                   m_currentClientID = 0;
    uint32                  m_connection_counter{ 0 };
    std::vector<connection> m_connections;
    struct {

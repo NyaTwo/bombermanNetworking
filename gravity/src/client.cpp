@@ -248,27 +248,38 @@ void client::handle_gamestate(const ip_address& address, byte_stream_reader& rea
 
     if (m_connection.is_connected()) {
         if (m_connection.m_acknowledge < info.m_sequence) {
-            for (int i = 0; i < 4; i++) {
-                if (i == m_clientID) {
-                    continue;
-                }
-                else {
-                    sf::Vector2f pos = sf::Vector2f(info.dynamicEntityPositions[i].x, info.dynamicEntityPositions[i].y);
+            for (uint32 i = 0; i < 2; i++) {
+                if (m_clientID == 2) {
+                    sf::Vector2f pos = sf::Vector2f(info.dynamicEntityPositions[1].x, info.dynamicEntityPositions[1].y);
                     if (m_inputinator.validateInput(pos, m_clientTick)) {
-                        m_entityPositions[i] = pos;
+                        m_entityPositions[1] = pos;
                     }
                     else {
                         m_mispredictions++;
-                        m_entityPositions[i] = pos;
+                        m_entityPositions[1] = pos;
                     }
-                    
+                }
+                else {
+                    sf::Vector2f pos = sf::Vector2f(info.dynamicEntityPositions[0].x, info.dynamicEntityPositions[0].y);
+                    if (m_inputinator.validateInput(pos, m_clientTick)) {
+                        m_entityPositions[0] = pos;
+                    }
+                    else {
+                        m_mispredictions++;
+                        m_entityPositions[0] = pos;
+                    }
                 }
             }
             for (int i = 0; i < 2; i++) {
                 m_staticEntityPositions[i].x = info.staticEntityPositions[i].x;
                 m_staticEntityPositions[i].y = info.staticEntityPositions[i].y;
             }
-            setPlayerPos(sf::Vector2f(m_entityPositions[m_clientID]));
+            if (m_clientID == 2) {
+                setPlayerPos(sf::Vector2f(m_entityPositions[0]));
+            }
+            else {
+                setPlayerPos(sf::Vector2f(m_entityPositions[1]));
+            }
             m_listener.on_receive(info.m_acknowledge, reader);
             m_clientTick = info.m_acknowledge;
         }
@@ -356,7 +367,7 @@ bool client::send_gamestate() {
     std::vector<float> dynTempArrayY;
     std::vector<float> statTempArrayX;
     std::vector<float> statTempArrayY;
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 2; i++) {
         dynTempArrayX.push_back(m_entityPositions[i].x);
         dynTempArrayY.push_back(m_entityPositions[i].y);
     }
@@ -391,16 +402,34 @@ bool client::send_byte_stream(const byte_stream &stream)
 
 void client::setPlayerPos(sf::Vector2f pos)
 {
-    m_entityPositions[m_clientID] = pos;
+    if (m_clientID == 2) {
+        m_entityPositions[0] = pos;
+    }
+    else {
+        m_entityPositions[1] = pos;
+    }
+    
 }
 
 void client::setStaticEntityPos(sf::Vector2f pos) {
-    m_staticEntityPositions[m_clientID] = pos;
+    if (m_clientID == 2) {
+        m_staticEntityPositions[0] = pos;
+    }
+    else {
+        m_staticEntityPositions[1] = pos;
+    }
 }
+   
 
 void client::resetOtherBombPos() {
-    m_staticEntityPositions[1] = sf::Vector2f(0,0);
+    if (m_clientID == 2) {
+        m_staticEntityPositions[1] = sf::Vector2f(0, 0);
+    }
+    else {
+        m_staticEntityPositions[0] = sf::Vector2f(0, 0);
+    }
 }
+    
 
 sf::Vector2f client::getPlayerPos()
 {
@@ -416,9 +445,14 @@ sf::Vector2f client::getPosOfStaticEntities(int entityNr)
     return m_staticEntityPositions[entityNr];
 }
 
-uint8 client::getClientID()
+uint32 client::getClientID()
 {
     return m_clientID;
+}
+
+void client::setClientID(uint32 clientID)
+{
+    m_clientID = clientID;
 }
 
 float client::getTimeBetweenUpdates()

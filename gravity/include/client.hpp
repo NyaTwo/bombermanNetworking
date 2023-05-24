@@ -39,7 +39,8 @@ struct client {
    sf::Vector2f getPlayerPos();
    sf::Vector2f getPosOfDynamicEntities(int enemyNr);
    sf::Vector2f getPosOfStaticEntities(int entityNr);
-   uint8        getClientID();
+   uint32        getClientID();
+   void        setClientID(uint32 clientID);
 
    float        getTime();
    int          getNumberOfMessages();
@@ -77,9 +78,9 @@ private:
    udp_socket   m_socket;
    connection   m_connection;
    sf::Clock    m_clock;
-   sf::Vector2f m_entityPositions[4];
+   sf::Vector2f m_entityPositions[2];
    sf::Vector2f m_staticEntityPositions[2];
-   uint8        m_clientID = 0;
+   uint32       m_clientID = 0;
    uint32       m_clientTick;
    
 private:

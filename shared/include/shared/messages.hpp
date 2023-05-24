@@ -12,7 +12,7 @@ enum class message_type {
 
 struct server_info_message {
    server_info_message();
-   server_info_message(uint32 tick);
+   server_info_message(uint32 tick, uint32 clientID);
 
    bool read(byte_stream_reader &reader);
    bool write(byte_stream_writer &writer);
@@ -20,18 +20,20 @@ struct server_info_message {
    template <typename S>
    bool serialize(S &stream)
    {
-      if (!stream.serialize(m_type)) { return false; }
-      if (!stream.serialize(m_tick)) { return false; }
+      if (!stream.serialize(m_type))    { return false; }
+      if (!stream.serialize(m_tick))    { return false; }
+      if (!stream.serialize(m_clientID)) { return false; }
       return true;
    }
 
    uint8  m_type{ 0 };
    uint32 m_tick{ 0 };
+   uint32 m_clientID{ 0 };
 };
 
 struct gameplay_info_message {
     gameplay_info_message();
-    gameplay_info_message(uint8 clientID,
+    gameplay_info_message(uint32 clientID,
         uint32 sequence,
         uint32 acknowledge, 
         std::vector<float> vX, 
@@ -62,7 +64,7 @@ struct gameplay_info_message {
     }
 
     uint8  m_type{ 0 };
-    uint8  m_clientID{ 0 };
+    uint32  m_clientID{ 0 };
     uint32 m_sequence{ 0 };
     uint32 m_acknowledge{ 0 };
     struct {

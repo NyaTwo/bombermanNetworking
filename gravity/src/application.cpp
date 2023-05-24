@@ -49,7 +49,7 @@ bool application::enter()
    if (m_client.getClientID() == 0) {
        m_player.setPlayerPosition(sf::Vector2f(400.f, 120.f));
    }
-   else if (m_client.getClientID() == 1) {
+   else{
        m_player.setPlayerPosition(sf::Vector2f(880.f, 600.f));
    }
   
@@ -104,9 +104,11 @@ bool application::update()
 {
     m_deltatime = m_clock.restart();
     m_apptime += m_deltatime;
-    if (m_serverDisc.serverFind(m_deltatime.asSeconds()) && !m_serverFound) {
-        m_serverIP = m_serverDisc.getServerIP();
-        m_serverFound = true;
+    if (!m_serverFound) {
+        if (m_serverDisc.serverFind(m_deltatime.asSeconds())) {
+            m_serverIP = m_serverDisc.getServerIP();
+            m_serverFound = true;
+        }
     }
    
    if (!m_gameEnded) {
@@ -354,7 +356,7 @@ void application::on_disconnect(const bool timeout)
 
 void application::on_send(uint32 sequence, byte_stream_writer &writer)
 {
-   server_info_message message(m_tick);
+   server_info_message message(m_tick, m_client.getClientID());
    if (!message.write(writer)) {
       assert(!"could not write server_info_message!");
    }
@@ -371,6 +373,7 @@ void application::on_receive(uint32 sequence, byte_stream_reader &reader)
             assert(!"could not read server_info_message!");
          }
          m_server_tick = message.m_tick;
+         m_client.setClientID(message.m_clientID);
       }
       else {
          assert(!"unknown message type!");

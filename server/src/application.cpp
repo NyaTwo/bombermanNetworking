@@ -66,7 +66,7 @@ bool application::tick(const timespan &deltatime)
 
 void application::on_connect(uint32 id)
 {
-   printf("nfo: %d connected\n", id);
+   printf("nfo: %d connecting\n", id);
    m_clients.emplace_back(id);
 }
 
@@ -85,7 +85,7 @@ void application::on_send(uint32 id, uint32 sequence, byte_stream_writer &writer
 {
    for (auto &p : m_clients) {
       if (p.m_id == id) {
-         server_info_message message(m_tick);
+         server_info_message message(m_tick, p.m_id);
          if (!message.write(writer)) {
             printf("err: failed to write server_info_message!\n");
          }
